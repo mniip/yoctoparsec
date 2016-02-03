@@ -16,8 +16,10 @@ module Control.Monad.Yoctoparsec
     )
     where
 
+import Data.List
 import Control.Applicative
 import Control.Monad
+import Control.Monad.State
 import Control.Monad.Trans.Free
 
 -- | A @Parser b t a@ is a parser that consumes a stream of @t@ tokens and as a
@@ -43,15 +45,9 @@ token = FreeT . pure . Free $ FreeT . pure . Pure
 -- | Apply a parser to a stream given a function that obtains the next character
 -- from the stream within the same non-determinism monad.
 parseStream :: Monad b => (s -> b (t, s)) -> Parser b t a -> s -> b (a, s)
-parseStream next bp s = do
-    p <- runFreeT bp
-    case p of
-        Pure r -> pure (r, s)
-        Free cont -> do
-            (t, s') <- next s
-            parseStream next (cont t) s'
+parseStream next = runStateT . iterTM (StateT next >>=)
 
 -- | Parse a string. When the end of the string is encountered, 'empty' is
 -- yielded into the non-determinism monad.
 parseString :: MonadPlus b => Parser b t a -> [t] -> b (a, [t])
-parseString = parseStream (\t -> case t of [] -> empty; x:xs -> pure (x, xs))
+parseString = parseStream (maybe empty pure . uncons)
