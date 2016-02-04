@@ -27,7 +27,8 @@ import Control.Monad.Trans.Free
 -- non-determinism monad. For most purposes @b@ should be a 'MonadPlus'. Useful
 -- examples include @[]@ if you want backtracking, 'Maybe' if you want no
 -- backtracking, @'StateT' []@ if you want to maintain a state that is
--- automatically reverted when backtracking, and so on.
+-- automatically reverted when backtracking, and so on. 'hoistFreeT' can be used
+-- to change the backtracking monad.
 --
 -- 'FreeT' provides us with instances for 'Functor', 'Applicative', 'Monad',
 -- 'Alternative' and 'MonadPlus'.
